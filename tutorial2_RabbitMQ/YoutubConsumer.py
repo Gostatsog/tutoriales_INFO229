@@ -3,7 +3,7 @@ import pika
 import sys
 from googleapiclient.discovery import build
 
-api_key = 'AIzaSyDYNGAgIm2kq0vEY4UH_Tve8uhNeXWSk3k'
+api_key = ''
 
 class Yutupi:
       #Constructor
