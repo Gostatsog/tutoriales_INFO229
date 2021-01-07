@@ -1,0 +1,9 @@
+# Create a new thought
+new_thought = ThoughtModel(username=username, text=text, timestamp=datetime.utcnow())
+db.session.add(new_thought)
+db.session.commit()
+
+# Retrieve and delete a thought
+thought = ThoughtModel.query.get(thought_id)
+db.session.delete(thought)
+db.session.commit()

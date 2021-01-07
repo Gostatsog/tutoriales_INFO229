@@ -1,0 +1,11 @@
+def validate_token_header(header, public_key):
+    if not header:
+        logger.info('No header')
+        return None
+
+    # Retrieve the Bearer token
+    parse_result = parse('Bearer {}', header)
+    if not parse_result:
+        logger.info(f'Wrong format for header "{header}"')
+        return None
+    token = parse_result[0]

@@ -1,0 +1,9 @@
+extra = {
+   'info': fields.String(),
+}
+extra_info = api_namespace.model('ExtraInfo', extra)
+
+model = {
+    'extra': fields.Nested(extra),
+    'extra_list': fields.List(fields.Nested(extra)),
+ }

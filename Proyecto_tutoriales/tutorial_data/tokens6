@@ -1,0 +1,4 @@
+$ openssl genrsa -out key.pem 2048
+Generating RSA private key, 2048 bit long modulus
+.....................+++
+.............................+++

@@ -1,0 +1,5 @@
+>> with open('private.pem') as fp:
+>> ..  private_key = fp.read()
+
+>> generate_token_header('peter', private_key)
+'Bearer <token>'

@@ -1,0 +1,5 @@
+# Retrieve a single thought by its primary key
+thought = ThoughtModel.query.get(thought_id)
+
+# Retrieve all thoughts filtered by a username
+thoughts = ThoughtModel.query.filter_by(username=username).order_by('id').all()

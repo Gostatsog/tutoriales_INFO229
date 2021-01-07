@@ -1,0 +1,4 @@
+model = {
+    'thought_text': fields.String(attribute='text'),
+    'thought_username': fields.String(attribute=lambda x: x.username),
+ }
