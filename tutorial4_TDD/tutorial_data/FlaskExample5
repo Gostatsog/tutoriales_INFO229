@@ -1,8 +1,0 @@
-@api_namespace.route('/me/thoughts/')
-class MeThoughtListCreate(Resource):
-
-    @api_namespace.marshal_with(thought_model)
-    def post(self):
-        ...
-        new_thought = ThoughtModel(...)
-        return new_thought

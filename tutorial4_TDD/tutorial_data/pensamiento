@@ -1,7 +1,0 @@
-thought
-{
-    id integer
-    username string
-    text string
-    timestamp string($data-time)
-}

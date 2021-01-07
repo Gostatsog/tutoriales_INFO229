@@ -1,3 +1,0 @@
-model = {
-    'timestamp': fields.DateTime(default=datetime.utcnow),
-}

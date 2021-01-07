@@ -1,9 +1,0 @@
-    try:
-        decoded_token = decode_token(token.encode('utf8'), public_key)
-    except jwt.exceptions.DecodeError:
-        logger.warning(f'Error decoding header "{header}". '
-        'This may be key missmatch or wrong key')
-        return None
-    except jwt.exceptions.ExpiredSignatureError:
-        logger.info(f'Authentication header has expired')
-        return None

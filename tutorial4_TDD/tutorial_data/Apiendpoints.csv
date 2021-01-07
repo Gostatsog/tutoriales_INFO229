@@ -1,7 +1,0 @@
-0, Endpoint, ¿Requiere autentificación?, Retorno
-"GET", /api/me/thoughts,Si, Lista de pensamientos del usuario
-"POST", /api/me/thoughts, Si, El pensamiento nuevo creado
-"GET", /api/thoughts, No, Lista de pensamientos
-"GET", /api/thoughts/X/	, No, El pensamiento con ID X
-"GET", /api/thoughts/?search=X	, No, Busca todos los pensamientos que contienen X
-"DELETE", /admin/thoughts/X/	, No, Elimina el pensamiento con ID X
