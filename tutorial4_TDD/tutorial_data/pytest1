@@ -1,0 +1,4 @@
+$ pytest
+============== test session starts ==============
+....
+==== 17 passed, 177 warnings in 1.50 seconds =====

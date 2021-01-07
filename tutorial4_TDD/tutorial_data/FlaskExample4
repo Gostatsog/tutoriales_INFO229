@@ -1,0 +1,9 @@
+from flask_restplus import fields
+
+model = {
+    'id': fields.Integer(),
+    'username': fields.String(),
+    'text': fields.String(),
+    'timestamp': fields.DateTime(),
+}
+thought_model = api_namespace.model('Thought', model)

@@ -1,4 +1,4 @@
-# Tutorial TDD
+# Varios Tutoriales y proyecto
 (introducción obtenida del github del ramo INFO229)
 El TDD (test drive development) es una práctica simple de desarrollo de software que recomienda a un equipo de desarrolladores seguir tres pasos (en este orden) para crear software:
 
@@ -12,20 +12,19 @@ Este proceso se conoce comúnmente como el ciclo **Red-Green-Refactor**.
 2. Se escribe el código en la aplicación hasta que su prueba pase - **Verde**
 3. Se refactoriza el código para hacerlo más legible y eficiente. No hay necesidad de preocuparse de que la refactorización rompa la nueva función, sólo tiene que volver a ejecutar la prueba y asegurarse de que pasa.  - **Refactor**
 
-Buscaremos aplicar los conceptos mas basicos de TDD a través de un ejercicio dado en el contexto de INFO229 de la Universidad Austral de Chile bajo el profesor Mathew Vernier.
 
 ## Ejercicio
-Aplicar el test en una aplicación flask dockerizada. La aplicación Consistirá en una pagina web donde se publicaran pensamientos parecido al modo en que twitter permite publicar. Hará uso de una base de datos donde guardar la información y deberá tener una arquitectura como lo que sigue:
+Desarrollaremos un microservicio web dockerizado. Dentro del proyecto usaremos una multitud de herramientas que serán explicadas, las cuales servirán por igual en reemplazo de los tutoriales individuales desde el 4 en adelante (espero xd). Entre las herramientas tenemos Flask-RESTPlus, SQLAlchemy, pytest, y otros módulos de python que estas herramientas necesitarán para expandir su funcionalidad. Hay un estudio del uso de tokens y en general un enfoque sobre los principios REST para el desarrollo de la API. La estructura general será la que se ve en la imágen a continuación (en una buena parte):
 @import "tutorial_data/aaaa.png"
 
 ### Información de importancia
-La idea y estructura del ejerecicio es tomado del libro "Hands-On Docker for Microservices with Python", de la editorial Packt. La mayor parte del tutorial será basado en el idioma ingles, a expecion del presente tutorial que guiará paso a paso como entender el código.
+La idea y estructura del ejerecicio es tomado del libro "Hands-On Docker for Microservices with Python", de la editorial Packt. El tutorial está en idioma ingles con lo que el mayor trabajo de este gran tutorial es traspasarlo a un español entendible (habrán palabras que preferí dejar en su idioma nativo por falta de un mejor concepto en nuestro idioma español), además de expandir conceptos y aterrizar ciertas partes del código para no sentirse perdido. Una carácterística importante del tutorial es que, aunque no profundiza en cada concepto y herramienta usada (solo lo necesario para entender nuestro código), da link de documentación de cada herramienta usada, así como de cada alternativa que valía la pena mencionar en el camino.
 
-## Paso a paso
+## INTRODUCCIÓN
 
 ### A tener en cuenta
 1. Debido a que estará conectado externamente se necesitará una capa de seguridad que impida la acción de usuarios no autorizados. Esta capa será dada por un header, el cual tendrá información dada por el usuario backend, verificando su origen. Esto lo haremos por medio de un token JWT (JSON Web Token) el cual es un estándar y explicaremos en detalle mas tarde.
-2. Se usaran los principios del diseño RESTful en nuestra API. Esto significa el uso de URIs construidos que representarán recursos y luego usar metodos HTTP para lograr acciones sobre estos recursos. La siguiente tabla tiene la siguiente estructura: URI, Endpoint, ¿Requiere autentificación?, Retorno.
+2. Se usaran los principios del diseño RESTful en nuestra API. Esto significa el uso de URIs construidos que representarán recursos y luego usar metodos HTTP para lograr acciones sobre estos recursos. La siguiente tabla muestra la estructura general de nuestra API.
     @import "tutorial_data/Apiendpoints.csv"
 
   - Expliquemos que significan estos elementos. Primero veamos nuestros endpoints. Tenemos dos elementos del API: una que empieza con /api y otra con /admin. En el caso de la primera tiene aun otra integrada dentro que es **/api/me** la cual será solo para publico autorizado (el usuario necesita autentificarse para hacer acciones en ese nivel), mientras que aquellas que van a solamente **/api** (como 3 de los GET que están en la tabla) serán para cualquier usuario  que ingrese en la página. Por el otro lado tenemos un API admin **/admin** que no sera expuesto publicamente. Como el nombre sugiere,permitirá operaciones que no estan diseñados sino para los administradores de la página.
@@ -66,6 +65,7 @@ Tenemos que con Flask somos capaces de implementar una interfaz RESTful, mas Fla
 2. Tiene una solución completa para parsear parametros de entrada. En pocas palabras quiere decir que tendremos una manera mas sencilla de lidiar con los endpoints que requieren una gran cantidad de paramentros y validarlos. Usando el módulo *[Request_Parsing](https://flask-restplus.readthedocs.io/en/stable/parsing.html)* es similar a usar el módulo de línea de comandos *[argparse](https://docs.python.org/3/library/argparse.html)* que esta incluido por defecto en la librería de Python. La utilidad yace en poder definir los argumentos en el cuerpo de solicitudes (request), headers, strings de consultas, o incluso cookies.
 3. De la misma forma tiene un framework de serialización para los objetos resultantes. Flask-RESTful le llama **[response_marshalling](https://flask-restplus.readthedocs.io/en/stable/marshalling.html)**. Esto ayuda a definir objetos que pueden ser reusados, clarificando la interfaz y simplificando el desarrollo. Si se habilita permite también asi mismo field mask, que retornan objetos parciales.
 4. Tiene una completa documentación API Swagger de soporte. [Swagger](https://swagger.io/) es un proyecto open-source (aleluya!!) que nos ayuda en el diseño, implementación, documentación y testeo de servicios web RESTful API, siguiendo las especificaciones estándar OpenAPI. Con Flask-RESTPlus automaticamente generaremos una especificación Swagger y una página autodocumentada como vemos a continuación:
+
 @import "tutorial_data/SwaggerWeb.png"
 
 Por otro lado, lo positivo de Flask viene del hecho que es un proyecto popular y tiene en consiguiente muchas herrmientas que le han dado soporte, como por ejemplo:
@@ -92,5 +92,159 @@ Como pudo ser visto, la mayoría de las acciones son configuradas y ejecutadas a
 
 ### Parsear parámetros de entrada
 
-Los parámetros de entrada pueden tomar dos formas diferentes. Cuando hablamos acerca de parametros de entrada hablamos generalmente de dos tipos diferentes:
- - String de consultas de parámetros codificadas dentro de la URL. Estos normalmente son usados para las solicitudes GET, los cuales son algo como *http://test.com/some/path?param1=X&param2=Y*. Estas son parte de la URL y serán almacenados en cualquier registro por el camino. Los parámetros están codificados en su respectivo formato, llamado *[URL_encoding](https://www.urlencoder.io/learn/)*. Te has dado cuenta probablemente, por ejemplo, como un espacio en blanco se transforma en *%20*. (Por lo general no tenemos que decodificar pues frameworks como Flask lo hacen por nosotros, mas Pyhton en su librería estándar tiene utilidades para ello como [urllib.parse](https://docs.python.org/3/library/urllib.parse.html)).
+Los parámetros de entrada pueden tomar diferentes formas. Cuando hablamos acerca de parametros de entrada podemos referirnos a:
+ - **String de consultas de parámetros codificadas dentro de la URL**. Estos normalmente son usados para las solicitudes GET, los cuales son algo como *http://test.com/some/path?param1=X&param2=Y*. Estas son parte de la URL y serán almacenados en cualquier registro por el camino. Los parámetros están codificados en su respectivo formato, llamado *[URL_encoding](https://www.urlencoder.io/learn/)*. Te has dado cuenta probablemente, por ejemplo, como un espacio en blanco se transforma en *%20*. (Por lo general no tenemos que decodificar pues frameworks como Flask lo hacen por nosotros, mas Pyhton en su librería estándar tiene utilidades para ello como [urllib.parse](https://docs.python.org/3/library/urllib.parse.html)). Pensemos por ejemplo en el cuerpo de una solicitud HTTP, tipicamente usada en solicitudes POST y PUT. El formato específico puede ser especificado usando el header(encabezado) *Content-type*. Por defecto este header se define como *aplication/x-www-form-urlencoded*, lo que lo codifica en codificación URL. En aplicaciones modernas esto se reemplaza con *application/json* para codificarlo en JSON. (El cuerpo de la solicitud no es guardado en registros, pues se espera que la solicitud GET produzca los mismos resultados al ser llamados muchas veces, osea que sea idempotente. Esto implica que pueda ser guardado en caché por algunos proxies y otros elementos. Esta es la razón por la que se te pide confirmación antes de enviar un solicitud POST por segunda vez, pues esta operación bien podrá dar resultados diferentes).
+ - **Como parte de una URL**. Cosas como *thought_id* son parametros. Para evitar confusiones en contextos mas complejos intenta seguir principios RESTful y definir como recursos tus URLs.
+ - **Headers**. Normalmente un header da información acerca de metadatos, tales como el formato de la solicitud, el formato esperado, o autentificación de datos. Con todo deben ser tratados igualmente como parametros.
+
+Todos estos elementos son decodificados por Flask-RESTPlus (Aleluya! x2), de modo que no tenemos que lidiar con codificar y accesos de bajo nivel.
+
+Veamos todo esto en un ejemplo de nuestro código, simplifiacod para describir mas que nada los parametros de parseo:
+@import "tutorial_data/FlaskExample2"
+
+ - Podemos ver en las primeras 7 líneas como definimos nuestro parser. Analicemos este estracto. En las línea 5 vemos que *authentification_parser* es heredado por *thought_parser*, con la razón de extender la funcionalidad y combinar ambos. Cada parámetro se defunte en terminos de tipo y sobre si son requeridos o no (línea 7). En caso que un parámetro requerido este perdido u otro elemento sea incorrecto Flask-RESTPlus dará un error *400 BAD_REQUEST*, dando algo de retroalimentación acerca de porque sucedio el error. 
+Dado que queremos manipular la autentificación en una manera ligeramente diferente lo etiquetamos como no requerido y permitimos que tome el valor por defecto (en nuestro framework) de *None* (línea 2-3). Una cosa mas que notar es como especificamos que el parametro de autorización deberá estar en los headers.
+ - Luego tenemos las líneas de la 9 en adelante (desde el decorador). El decorador en el método **POST** nace con el fin de especificar que se espera un parametro *thought_parser*. Luego lo parseamos con parse_args como se ve en la penúltima línea. Mas aún, *args* es ahora un diccionario con todos los parámetros propiamente parseados y usado en las líneas que siguen. Para el caso de la autentificación, por ejemplo, existe una función específica para trabajar con ello el cual retorna un código de status *401 UNAUTHORIZED* a través del uso de *abort*. Este llamado inmediatamente interrumpirá una solicitud:
+ @import "tutorial_data/FlaskExample3"
+
+Ahora dejaremos algo de lado la acción a ejecutar (guardar un nuevo pensamiento en la base de datos), y nos enfocaremos en otras configuraciones de framework, para serializar los resultados en un objeto JSON.
+
+### Serializar resultados
+Debemos devolver nuestros resultados. La manera mas fácil de hacerlo es definiendo la forma que el JSON resultante deberá tener por medio de un serializador o modelo *[marshalling](https://flask-restplus.readthedocs.io/en/stable/marshalling.html)*. Un modelo serializador es definido como un diccionario con los campos esperados y un tipo de campo, como podemos ver en el siguiente código:
+@import "tutorial_data/FlaskExample4"
+El modelo tomara un objeto Pyhton y convertirá cada uno de los atributos en su correspondiente elemento JSON, como definido en el campo(línea 4):
+@import "tutorial_data/FlaskExample5"
+Notemos que *new_thought* es un objeto *ThoughtModel*, como es recuperado por SQLAlchemy. Lo veremos ne mayor detalle mas adelante, mas por ahora es suficiente decir que tiene todos los atributos definidos en el modelo: *id, username, text,* y *timestamp*.
+
+Cualquier atributo no presente en el objeto memoria tendrá un valor de **None** por defecto, aunque puedes cambiarlo a un valor de retorno. Para esto deberás especificar una función, de modo que se invoque para recuperar el valor cuando la respuesta se genere. Esto es una forma de agregar información dinámica a tu objeto:
+@import "tutorial_data/FlaskExample6"
+Puedes así mismo añadir el nombre del atributo serializado, en caso que sea diferente que la salida esperada, o añadir una función lambda que será creada para recuperar dicho valor:
+@import "tutorial_data/FlaskExample7"
+
+Para objetos mas complejos puedes hacer valores anidados. Hay que tener en cuenta con todo que esto definirá dos modelos desde el punto de vista de la documentación y que ese elemento anidado crea un nuevo alcance. Puedes usar tambipen *List* para añadir múltiples instancias del mismo tipo:
+@import "tutorial_data/FlaskExample8"
+Algunos de los campos disponibles tienen mas opciones, tales como el formato de fecha para los campos de *DateTime*. Sigue el siguiente [link](https://flask-restplus.readthedocs.io/en/stable/api.html#models) para la ducumentación completa de campos.
+
+Algo interesante por ejemplo es que si devuelves una lista de elementos, añadiendo el parametro *as_list = True* en el decorador *marshal_with*, como se ve aquí:
+@import "tutorial_data/FlaskExample9"
+El decorador marshal_with transformará el objeto *result* de un objeto Python a el correspondiente objeto de datos JSON.
+
+Por defecto retornará un código de status *http.client.ok (200)*, mas podemos expandir tal reotrno a dos valores: El primero siendo un objeto marshal y el segundo el código de status. El código de paramentro en el decorador *marshal_with* es usado por motivos de futura documentación. De notar en este caso es que nesecitamos añadir la llamada *marshal* específica:
+@import "tutorial_data/FlaskExample10"
+La documentación Swagger exhibirá todos los objetos *marshal* de uso definido, de una manera como muestra la imágen:
+
+@import "tutorial_data/SwaggerMarshal.png"
+
+### Disclaimer de Flask-RESTPlus
+
+Un punto inconveniente de Flask-RESTPlus es que para ingresar(input) y sacar(output) los mismos objetos deben ser definidos dos veces, pues los modulos de entrada y salida son diferentes. Esto no es así en otros framework RESTful, como por ejemplo *[Django REST framework](https://www.django-rest-framework.org/)*. Los desarrolladores que mantienen Flask-RESTPlus saben bien esto y, en concordancia, están integrando un modulo externo, que probablemente sea *[marshmallow](https://marshmallow.readthedocs.io/en/stable/)*. Puedes integrarlo por ti mismo si quieres, ya que Flask es lo suficientemente flexible para ello. Mira el ejemplo en el siguiente [link](https://marshmallow.readthedocs.io/en/stable/examples.html#quotes-api-flask-sqlalchemy) para mas info. Mas detalles pueden ser encontrados en la documentación completa de [marshmalling](https://flask-restplus.readthedocs.io/en/stable/marshalling.html) por Flask-RESTPlus.
+
+## Ejecutando la acción (por fin)
+Finalmente llegamos a la sección específica donde los datos ingresados están limpios y listos para uso, sabiendo además como devolver los resultados. Esta parte tiene que ver con ejecutar alguna(s) consulta(s) de base de datos y componer los resultados. Veamos el siguiente ejemplo:
+@import "tutorial_data/FlaskExample11"
+
+Podemos ver aquí, luego de parsear los parametros, como usamos SQLAlchemy para recuperar una consulta que, si el parametro *search* es presente, aplicará un filtro. Obtenemos todos los resultados con el comando *all()*, retornando todos los objetos de *ThoughtModel*. 
+Retornar los objetos automáticamente los hace pasar por marshal (codifica en un JSON), como lo hemos específicado en el decorador *marshal_with*.
+
+## Autentificando las solicitudes (request)
+
+La lógica de la autentificación está encapuslada en el archivo *ThoughtsBackend/thought_backend/token_validation*. Este contiene tanto la generación como la validación del header. 
+Como ejemplo, la siguiente función genera el token *Bearer*:
+@import "tutorial_data/tokens1"
+
+Este código genera un payload JWT (el concepto de payload no tiene un concepto español que conozca que lo defina bien). Incluye *username* para ser usado como un valor personalizado, pero también así añade dos campos estándar, una fecha de expiración *exp*  y el generador de tiempo *iat* del token.
+
+Luego el token se codifica usando el algoritmo **RS256**, con una llave privada, y devuelta en el formato apropiado: *Bearer < token>*.
+La acción inversa es obtener el *username* desde un header codificado. El código será mas largo, pues tendremos en cuenta las diferentes opciones en las cuales podríamos recibir el header de *autentificación*.  Este header viene directamente de nuestra API pública (/api), de modo que debieramos esperar que cualquier valor y programa esten listos defensivamente para ello. 
+La decodificación del token mismo es simplista, debido a que la acción *jwt.decode* lo hará por nosotros:
+@import "tutorial_data/tokens2"
+
+Con todo, antes de llegar a este paso necesitaremos obtener el token y verificar que el header es valido en multiples casos, de modo que chequearemos primero si es que el header está vacío, y si es que tiene el formato apropiado, extrayendo el token:
+@import "tutorial_data/tokens3"
+
+Solo después de ello podemos decodificar el token. Si no pudiera ser decodificado con la llave pública arrojará un error *DecodeError*. El token puede así también expirar:
+@import "tutorial_data/tokens4
+Luego chequeamos que tenga los parametros *exp* y *username* esperados. Si alguno de estos parametros está perdido significa que el formato token, luego de la decoficación, quedó incorrecto. Esto puede pasar al cambiar el código en versiones diferentes:
+@import "tutorial_data/tokens5"
+
+Si todo va bien devolverá el valor del *username* en el final.
+
+Cada uno de estos problemas es registrado con una severidad diferente. En la mayoría de las ocurrencias se registran con seguridad a nivel de información(info-level), dado que no son graves. Errores tales como errores de formato luego de decodificado un token puede indicar problemas con nuestro proceso de codificación.
+
+Tengamos en cuenta que estamos usando un esquema de llave privado/público, en vez de un esquema de llave simetrica, a la hora de codificar y decodificar nuestros tokens. Esto significa que las llaves de decodificación y codificación son diferentes. 
+
+En nuestra estructura de microservicio solo el autor de la firma (signing authority) requiere la llave privada.  Esto añade seguridad debido a que cualquier filtración de llaves en otros servicios no serán capaces de recuperar una llave capaz de firmar(signing) bearer(portadores) tokens. Necesitaremos con todo generar llaves públicas y privadas apropiadas al caso.
+Para añadir estas llaves privadas/públicas solo ejecuta el siguiente comando:
+@import "tutorial_data/tokens6"
+(La primera línea, pues las otras líneas son la salida del terminal)
+
+Ahora para extraer la llave pública usa lo siguiente:
+@import "tutorial_data/tokens7"
+
+Esto generará dos archivos: *key.pem* y *key.pub* con un par privado/público de llaves. Leerlos en formato texto sera suficiente para ocuparlas como llaves para codificar/decodificar el token JWT:
+@import "tutorial_data/tokens8"
+
+De notar es que para los tests generamos un par de llaves de prueba que esta adjunto como strings. Estas llaves han sido creadas especificamente para este uso y no seran usadas en ningun otro espacio del proyecto. No son para uso sino para razones de este proyecto, no deben ocuparse para otras tareas.
+
+### Nota sobre las llaves en JWT
+Debes tener presente que requerirás una llave privada no encriptada, no protegida por contraseña, pues el módulo JWT no permite añadir una contraseña. **No recopiles llaves secretas de producción en archivos no protegidos**. Busca la forma de inyectarlos mientras se mantienen en secreto por medio del uso de variables de ambiente. Como manejar adecuadamente con datos secretos en ambientes de producción no es parte de este tutorial. Informate.
+
+## Testeando el código
+
+Finalmente llegamos al punto donde trabajaremos con pytest, según el enfoque TDD visto en clase. Pytest es un framework, el cual es conocido como el estándar por exelencia en ejecución de tests para aplicaciones python. 
+
+En pocas palabras pytest tiene muchos plugins y complementos para lidiar con muchisimas situaciones. Estaremos usando para el proyecto, en específico, *pytest-flask*, el cual nos ayudará a ejecutar tests para una aplicación Flask (como es de esperarse).
+
+Para ejecutar los tests tan solo debemos ejecutar en el comandos de línea el comando *pytest*:
+@import "tutorial_data/pytest1"
+
+Algunos prefijos a tener en cuenta en el uso del comando pytest son,
+  - *-k* el cual es para ejecutar un subconjunto de pruebas coincidentes.
+  - *--lf* para correr los últimos tests que fallaron
+  - *-x* para detener los tests al encuentro del primer error
+Estos y otros prefijos son de bastante utilidad a la hora de ejecutar test. Es recomendable chequear la documentación completa que puede verse en el siguiente [link](https://docs.pytest.org/en/latest/), y descubrir todas las posibilidades que tenemos a disposición.
+
+Configuramos el uso básico, incluyendo el mantener habilitado ciertos flags en el archivo *ThoughtsBackend/pytest.ini* y algunos accesorios (fixtures) en *ThoughtsBackend/tests/conftest.py*.
+Por tanto empezemos entendiendo algo mas acerca de estos archivos (en el caso de pytest.ini no hay mas que añadir que le quitamos las advertencias de pytest).
+
+### Definiendo los accesorios(fixtures) de pytest
+
+Los accesorios son usados en pytest para preparar el contexto en el cual los test serán ejecutados, preparandolo y limpiandolo en el final. Los accesorios de aplicación son esperados por pytest-flask, como bien se puede leer en la documentación (de la cual ya dimos el link). Los plugins general un accesorio *client* que podremos usar para enviar solicitudes en modo test. Veremos este accesorio en acción en el accesorio *thoughts_fixture*, el cual genera tres pensamientos a través de la API y elimina todo luego de ejecutarse nuestro test.
+La estructura es como sigue:
+1. Generamos tres pensamientos. Recopilamos sus *thought_id*:
+@import "tutorial_data/pytest2"
+
+2. Luego añadimos *yield thought_ids* al test:
+@import "tutorial_data/pytest3"
+
+3. Recuperamos todos los pensamientos y los eliminamos uno por uno:
+@import "tutorial_data/pytest4"
+
+Tengamos en cuenta que usamos el módulo *faker* para generar nombres y textos inventados. Si quieres la documentación del módulo apreta en el [link](https://faker.readthedocs.io/en/stable/). Es una buena manera de generar valores aleatorios para tus tests que evitan el reusar *test_user* y *test_text* una y otra vez. También ayuda a dar forma a tus tests al chequear el input independientemente y no copiando ciegamente un placeholder. 
+
+Otro punto importante de los tests y en especial de la integración de accesorios es como ejercitan nuestra API. Al trabajar de esta manera, aunque nuestro ejemplo es básico, nos da una buena idea de como funciona nuestro enfoque en microservicios en el servicio como un todo, demostrando que no simplemente ordenamos el código de manera estratégica para lograr operaciones triviales pero no completamente funcionales.
+Por útlimo es de notar el uso de el accesorio *client*, el cual nos es provisto por *pytest-flask*.
+
+### Entendiendo test_token_validation.py
+
+Este archivo test testea el comportamiento del header autentificación, de modo que es importante testearlo a profundidad.
+
+De principio testea si el header puede ser codificado y decodificado con las llaves apropiadas. También chequea todas las diferentes posibilidades en términos de entradas validas (diferentes formas o formatos incorrectos, llaves de decodificación inválidos, o  tokens expirados). 
+
+Para chequear tokens expirados usamos dos módulos:
+ - *[freezegun](https://github.com/spulec/freezegun)* para hacer que el test devuelva un tiemop de test específico.
+ - *[delorean](https://delorean.readthedocs.io/en/latest/)* para parsear fechas mas facilmente (aunque el módulo es capaz de mas; cliqueando los nombres de los módulos los llevará a sus documentaciones completas).
+Estos dos módulos son fáciles de usar y muy buenos en propósitos de pruebas. 
+
+Como ejemplo este código es un test que chequea un token expirado:
+@import "tutorial_test/pytest5"
+
+Percatemonos como el freeze time (tiempo congelado) es precisamente 1 segundo luego de el tiempo de expiración del token. 
+
+Las llaves publicas y privadas usadas para los test son definidas en el archivo *ThoughtsBackend/tests/constants.py*. Hay una llave pública independiente extra usada para chequear que sucede si tu decodificas un token con una llave pública inválida.
+
+### test_thoughts.py
+
+Este archivo chequea las interfaces API definidas. A cada API se le testea para ejecutar las acciones correctamente (crear un nuevo pensamiento, devolver pensamientos de un usuario, recuperar todos los pensamientos, buscar a través de los pensamientos, y recuperar un pensamiento por ID) así como también algunos tests de errores (solicitudes no autorizadas para crear y recuperar pensamientos de un usuario, o recuperar un pensamiento no existente).
+
+En este contexto usamos nuevamente *freezegun* para determinar cuando los pensamientos son creados, en ves de crearlos con un timestamp dependiendo de los tiempos de ejecución de los test.

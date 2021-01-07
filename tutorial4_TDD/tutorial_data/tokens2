@@ -1,0 +1,2 @@
+def decode_token(token, public_key):
+    return jwt.decode(token, public_key, algoritms='RS256')
