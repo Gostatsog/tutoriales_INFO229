@@ -1,5 +1,5 @@
 import os 
-import wikipod 
+from wikipod import wikiPod 
 
 #Buscar dato
-wikiPod.buscarDato()
+wikiPod.buscar_dato()

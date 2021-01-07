@@ -1,5 +1,4 @@
 import wikipedia
-import pageviewapi
 import pymongo
 import os
 
@@ -15,12 +14,12 @@ class wikiPod:
       def subir_mensaje(dato):
          #conexion a MONGO
          myclient = pymongo.MongoClient(host=os.environ['MONGO_HOST'], port=int(os.environ['MONGO_PORT']))
-         db = client[DATABASE]
+         db = myclient[DATABASE]
          col = db[COLLECTION]
-         col.insert_one({title:dato.title,content:dato.content})
+         col.insert_one({'title':dato.title,'content':dato.content})
 
      #Buscar dato
-      def buscarDato(dat="Programming"):
+      def buscar_dato():
          dat = input("¿Qué articulo desea buscar?: ")        
          a = wikipedia.search(dat)
          for i in a:

@@ -7,8 +7,6 @@ COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
 
-WORKDIR /wiki
-
 COPY ./wikipod.py /wikipod.py
 COPY ./wikipedia_app.py /wikipedia_app.py
 
